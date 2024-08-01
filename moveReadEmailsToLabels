@@ -1,0 +1,32 @@
+function moveReadEmailsToLabels() {
+  // Retrieve all labels
+  var allLabels = GmailApp.getUserLabels();
+  
+  // Create a map to store label names and their corresponding Label objects
+  var labelMap = {};
+  
+  // Populate the map with label names as keys and Label objects as values
+  allLabels.forEach(function(label) {
+    labelMap[label.getName()] = label;
+  });
+  
+  // Process each label from the map
+  for (var labelName in labelMap) {
+    if (labelMap.hasOwnProperty(labelName)) {
+      var label = labelMap[labelName];
+      
+      // Search for read emails that are labeled with the current label and are in the inbox
+      var query = 'is:read label:' + labelName + ' in:inbox';
+      var threads = GmailApp.search(query);
+      
+      // Move each thread to the specific label
+      threads.forEach(function(thread) {
+        // Apply the label if not already applied
+        thread.addLabel(label);
+        
+        // Remove the thread from the inbox (i.e., archive it)
+        thread.moveToArchive();
+      });
+    }
+  }
+}
